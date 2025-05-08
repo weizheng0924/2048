@@ -1,6 +1,7 @@
 const gridSize = 4;
 let grid = [];
 let score = 0;
+let tileAnimations = [];
 
 function initGrid() {
     grid = [];
@@ -37,14 +38,27 @@ function updateGrid() {
             const tile = document.createElement('div');
             tile.className = 'tile' + (grid[i][j] ? ' tile-' + grid[i][j] : '');
             tile.textContent = grid[i][j] ? grid[i][j] : '';
+            // 檢查是否有動畫
+            const anim = tileAnimations.find(a => a.to[0] === i && a.to[1] === j);
+            if (anim) {
+                if (anim.type === 'move') tile.classList.add('move-' + anim.dir);
+                if (anim.type === 'merge') tile.classList.add('merge');
+                // 動畫結束後移除 class
+                tile.addEventListener('animationend', () => {
+                    tile.classList.remove('move-' + anim.dir);
+                    tile.classList.remove('merge');
+                }, { once: true });
+            }
             container.appendChild(tile);
         }
     }
+    tileAnimations = [];
 }
 
 function move(dir) {
     let moved = false;
     let merged = Array.from({length: gridSize}, () => Array(gridSize).fill(false));
+    tileAnimations = [];
     function traverse(i, j) {
         let ni = i, nj = j;
         switch(dir) {
@@ -58,6 +72,7 @@ function move(dir) {
             grid[ni][nj] = grid[i][j];
             grid[i][j] = 0;
             moved = true;
+            tileAnimations.push({type: 'move', from: [i, j], to: [ni, nj], dir});
             return traverse(ni, nj) || true;
         } else if (grid[ni][nj] === grid[i][j] && !merged[ni][nj] && !merged[i][j]) {
             grid[ni][nj] *= 2;
@@ -65,6 +80,7 @@ function move(dir) {
             grid[i][j] = 0;
             merged[ni][nj] = true;
             moved = true;
+            tileAnimations.push({type: 'merge', from: [i, j], to: [ni, nj], dir});
             return true;
         }
         return false;
