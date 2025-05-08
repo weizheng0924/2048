@@ -35,19 +35,25 @@ function updateGrid() {
     container.innerHTML = '';
     for (let i = 0; i < gridSize; i++) {
         for (let j = 0; j < gridSize; j++) {
-            const tile = document.createElement('div');
-            tile.className = 'tile' + (grid[i][j] ? ' tile-' + grid[i][j] : '');
-            tile.textContent = grid[i][j] ? grid[i][j] : '';
-            // 檢查是否有動畫
-            const anim = tileAnimations.find(a => a.to[0] === i && a.to[1] === j);
-            if (anim) {
-                if (anim.type === 'move') tile.classList.add('move-' + anim.dir);
-                if (anim.type === 'merge') tile.classList.add('merge');
-                // 動畫結束後移除 class
-                tile.addEventListener('animationend', () => {
-                    tile.classList.remove('move-' + anim.dir);
-                    tile.classList.remove('merge');
-                }, { once: true });
+            let tile;
+            if (grid[i][j]) {
+                tile = document.createElement('div');
+                tile.className = 'tile tile-' + grid[i][j];
+                tile.textContent = grid[i][j];
+                // 檢查是否有動畫
+                const anim = tileAnimations.find(a => a.to[0] === i && a.to[1] === j);
+                if (anim) {
+                    if (anim.type === 'move') tile.classList.add('move-' + anim.dir);
+                    if (anim.type === 'merge') tile.classList.add('merge');
+                    tile.addEventListener('animationend', () => {
+                        tile.classList.remove('move-' + anim.dir);
+                        tile.classList.remove('merge');
+                    }, { once: true });
+                }
+            } else {
+                tile = document.createElement('div');
+                tile.className = 'tile-bg';
+                tile.textContent = '';
             }
             container.appendChild(tile);
         }
@@ -125,3 +131,32 @@ document.addEventListener('keydown', e => {
 document.getElementById('restart').onclick = initGrid;
 
 window.onload = initGrid;
+
+// 手機觸控手勢支援
+let touchStartX = 0, touchStartY = 0;
+let touchEndX = 0, touchEndY = 0;
+const minSwipeDistance = 30; // 最小滑動距離
+
+document.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    }
+});
+
+document.addEventListener('touchend', function(e) {
+    if (e.changedTouches.length === 1) {
+        touchEndX = e.changedTouches[0].clientX;
+        touchEndY = e.changedTouches[0].clientY;
+        const dx = touchEndX - touchStartX;
+        const dy = touchEndY - touchStartY;
+        if (Math.abs(dx) < minSwipeDistance && Math.abs(dy) < minSwipeDistance) return;
+        if (Math.abs(dx) > Math.abs(dy)) {
+            if (dx > 0) move('right');
+            else move('left');
+        } else {
+            if (dy > 0) move('down');
+            else move('up');
+        }
+    }
+});

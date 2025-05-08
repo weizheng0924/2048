@@ -40,6 +40,14 @@ h1 {
     transition: background 0.2s, color 0.2s;
 }
 
+.tile-bg {
+    width: 80px;
+    height: 80px;
+    background: #cdc1b4;
+    border-radius: 5px;
+    /* 不加動畫 */
+}
+
 .tile-2    { background: #eee4da; }
 .tile-4    { background: #ede0c8; }
 .tile-8    { background: #f2b179; color: #f9f6f2; }
