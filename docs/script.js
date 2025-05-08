@@ -132,19 +132,21 @@ document.getElementById('restart').onclick = initGrid;
 
 window.onload = initGrid;
 
-// 手機觸控手勢支援
+// 手機觸控手勢支援（只在遊戲區域監聽，並阻止頁面滾動）
 let touchStartX = 0, touchStartY = 0;
 let touchEndX = 0, touchEndY = 0;
 const minSwipeDistance = 30; // 最小滑動距離
 
-document.addEventListener('touchstart', function(e) {
+const gridContainer = document.getElementById('grid-container');
+gridContainer.addEventListener('touchstart', function(e) {
     if (e.touches.length === 1) {
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
     }
-});
+    e.preventDefault();
+}, { passive: false });
 
-document.addEventListener('touchend', function(e) {
+gridContainer.addEventListener('touchend', function(e) {
     if (e.changedTouches.length === 1) {
         touchEndX = e.changedTouches[0].clientX;
         touchEndY = e.changedTouches[0].clientY;
@@ -159,4 +161,5 @@ document.addEventListener('touchend', function(e) {
             else move('up');
         }
     }
-});
+    e.preventDefault();
+}, { passive: false });
